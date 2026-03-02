@@ -1,6 +1,5 @@
 'use client';
 
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Activity, Wifi } from 'lucide-react';
@@ -8,7 +7,10 @@ import { Activity, Wifi } from 'lucide-react';
 export default function RealtimePage() {
   return (
     <div>
-      <Header title="Real-time Monitoring" subtitle="Live energy data across all Fusion sites" />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">Real-time Monitoring</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">Live energy data across all Fusion sites</p>
+      </div>
 
       <div className="flex items-center gap-2 mb-6">
         <Badge variant="success">

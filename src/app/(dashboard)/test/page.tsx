@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -53,7 +52,10 @@ export default function TestPage() {
 
   return (
     <div className="space-y-10 pb-16">
-      <Header title="Design System" subtitle="Every component variant — visual verification page" />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">Design System</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">Every component variant — visual verification page</p>
+      </div>
 
       {/* ── BUTTONS ────────────────────────────────────────────────── */}
       <section>

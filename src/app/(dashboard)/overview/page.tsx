@@ -1,7 +1,6 @@
 'use client';
 
 import { Zap, PoundSterling, Leaf, TrendingDown } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { Card } from '@/components/ui/Card';
 import { EnergyBreakdown } from '@/components/dashboard/EnergyBreakdown';
@@ -10,10 +9,10 @@ import { colors } from '@/lib/brand-config';
 export default function OverviewPage() {
   return (
     <div>
-      <Header
-        title="Portfolio Overview"
-        subtitle="Fusion Students energy performance across all sites"
-      />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">Portfolio Overview</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">Fusion Students energy performance across all sites</p>
+      </div>
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

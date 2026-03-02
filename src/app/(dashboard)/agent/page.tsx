@@ -1,6 +1,5 @@
 'use client';
 
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { AgentActionLog } from '@/components/dashboard/AgentActionLog';
@@ -17,7 +16,10 @@ const demoActions = Array.from({ length: 8 }, (_, i) => {
 export default function AgentPage() {
   return (
     <div>
-      <Header title="AI Agent" subtitle="Autonomous energy management decisions" />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">AI Agent</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">Autonomous energy management decisions</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <MetricCard label="Total Actions" value={142} subtext="Last 30 days" icon={<Brain size={20} className="text-fusion-primary" />} />

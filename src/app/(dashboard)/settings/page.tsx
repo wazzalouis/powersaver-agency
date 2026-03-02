@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
@@ -19,7 +18,10 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <Header title="Settings" subtitle="Platform configuration" />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">Settings</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">Platform configuration</p>
+      </div>
 
       <div className="space-y-4 max-w-2xl">
         <Card padding="md">

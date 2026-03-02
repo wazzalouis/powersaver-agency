@@ -1,7 +1,6 @@
 'use client';
 
 import { use } from 'react';
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -20,7 +19,10 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
 
   return (
     <div>
-      <Header title={siteName} subtitle={`Detailed energy analytics for ${siteName}`} />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">{siteName}</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">Detailed energy analytics for {siteName}</p>
+      </div>
 
       <div className="flex items-center gap-2 mb-6">
         <Badge variant="success" dot>Operational</Badge>

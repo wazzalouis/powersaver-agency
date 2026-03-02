@@ -1,6 +1,5 @@
 'use client';
 
-import { Header } from '@/components/layout/Header';
 import { SiteCard } from '@/components/dashboard/SiteCard';
 import { useAuth } from '@/lib/auth-helpers';
 import type { Site } from '@/types/site';
@@ -36,7 +35,13 @@ export default function SitesPage() {
 
   return (
     <div>
-      <Header title="Sites" subtitle={isSiteManager ? 'Your assigned properties' : 'All Fusion Students properties'} />
+      <div className="mb-6">
+        <h1 className="text-2xl font-display text-fusion-text">Sites</h1>
+        <p className="text-sm text-fusion-text-secondary mt-0.5">
+          {isSiteManager ? 'Your assigned properties' : 'All Fusion Students properties'}
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredSites.map((site, i) => (
           <SiteCard
