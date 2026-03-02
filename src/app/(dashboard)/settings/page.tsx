@@ -5,11 +5,17 @@ import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth-helpers';
+import { AccessDenied } from '@/components/auth/AccessDenied';
 
 export default function SettingsPage() {
+  const { isAdmin, isLoading } = useAuth();
   const [agentEnabled, setAgentEnabled] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [autoReports, setAutoReports] = useState(true);
+
+  if (isLoading) return null;
+  if (!isAdmin) return <AccessDenied message="Only administrators can access platform settings." />;
 
   return (
     <div>

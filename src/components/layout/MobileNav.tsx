@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { LayoutDashboard, Activity, Building2, Brain, PiggyBank } from 'lucide-react';
 
 const mobileNavItems = [
@@ -14,6 +15,9 @@ const mobileNavItems = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  if (!session) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-fusion-cream z-50 md:hidden">

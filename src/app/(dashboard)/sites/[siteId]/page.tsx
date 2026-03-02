@@ -5,12 +5,18 @@ import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { MetricCard } from '@/components/dashboard/MetricCard';
+import { useAuth } from '@/lib/auth-helpers';
+import { AccessDenied } from '@/components/auth/AccessDenied';
 import { Zap, PoundSterling, Leaf, Building2 } from 'lucide-react';
 
 export default function SiteDetailPage({ params }: { params: Promise<{ siteId: string }> }) {
   const { siteId } = use(params);
+  const { canAccessSite, isLoading } = useAuth();
 
   const siteName = siteId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  if (isLoading) return null;
+  if (!canAccessSite(siteId)) return <AccessDenied message="You do not have access to this site." />;
 
   return (
     <div>

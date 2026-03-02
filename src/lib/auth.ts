@@ -1,5 +1,15 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { createHash } from 'node:crypto';
+import { prisma } from './prisma';
+
+function verifyPassword(password: string, stored: string): boolean {
+  const parts = stored.split(':');
+  if (parts.length !== 3 || parts[0] !== 'sha256') return false;
+  const salt = parts[1];
+  const hash = createHash('sha256').update(salt + password).digest('hex');
+  return hash === parts[2];
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,30 +20,25 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Demo credentials for presentation
-        if (
-          credentials?.email === 'admin@fusionstudents.co.uk' &&
-          credentials?.password === 'FusionEnergy2026'
-        ) {
-          return {
-            id: '1',
-            name: 'Portfolio Manager',
-            email: 'admin@fusionstudents.co.uk',
-            role: 'admin',
-          };
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+          include: { siteAccess: { select: { id: true, slug: true } } },
+        });
+
+        if (!user || !verifyPassword(credentials.password, user.password)) {
+          return null;
         }
-        if (
-          credentials?.email === 'viewer@fusionstudents.co.uk' &&
-          credentials?.password === 'FusionViewer2026'
-        ) {
-          return {
-            id: '2',
-            name: 'Site Manager',
-            email: 'viewer@fusionstudents.co.uk',
-            role: 'viewer',
-          };
-        }
-        return null;
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          siteIds: user.siteAccess.map((s) => s.id),
+          siteSlugs: user.siteAccess.map((s) => s.slug),
+        };
       },
     }),
   ],
@@ -42,14 +47,18 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
+        token.id = user.id;
+        token.role = user.role;
+        token.siteIds = user.siteIds;
+        token.siteSlugs = user.siteSlugs;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        (session.user as { role?: string }).role = token.role as string;
-      }
+      session.user.id = token.id;
+      session.user.role = token.role;
+      session.user.siteIds = token.siteIds;
+      session.user.siteSlugs = token.siteSlugs;
       return session;
     },
   },

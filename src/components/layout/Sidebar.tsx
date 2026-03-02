@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, Activity, Building2, Brain, PiggyBank, Settings, LogOut, Zap,
+  LayoutDashboard, Activity, Building2, Brain, PiggyBank, Settings, LogOut, Zap, User,
 } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/constants';
 import { AgentStatusBadge } from '@/components/brand/AgentStatusBadge';
@@ -18,8 +19,20 @@ const iconMap: Record<string, React.ReactNode> = {
   Settings:        <Settings size={18} />,
 };
 
+// Settings is admin-only
+const ADMIN_ONLY_PATHS = ['/settings'];
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = session?.user?.role;
+
+  const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (ADMIN_ONLY_PATHS.includes(item.href) && role !== 'ADMIN') return false;
+    return true;
+  });
+
+  const roleBadge = role === 'ADMIN' ? 'Admin' : role === 'SITE_MANAGER' ? 'Site Manager' : 'Viewer';
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[var(--sidebar-width)] bg-fusion-primary flex flex-col z-40">
@@ -41,7 +54,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-0.5">
-        {NAV_ITEMS.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
           return (
             <Link key={item.href} href={item.href}>
@@ -69,9 +82,23 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 py-4 border-t border-white/10">
-        <button className="flex items-center gap-3 px-3 py-2 text-sm text-white/40 hover:text-white/70 transition-colors w-full">
+      {/* User Info + Sign Out */}
+      <div className="px-3 py-4 border-t border-white/10 space-y-2">
+        {session?.user && (
+          <div className="flex items-center gap-3 px-3 py-2">
+            <div className="w-7 h-7 rounded-full bg-fusion-sage/20 flex items-center justify-center">
+              <User size={14} className="text-fusion-sage" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-white truncate">{session.user.name}</p>
+              <p className="text-[10px] text-fusion-sage">{roleBadge}</p>
+            </div>
+          </div>
+        )}
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="flex items-center gap-3 px-3 py-2 text-sm text-white/40 hover:text-white/70 transition-colors w-full"
+        >
           <LogOut size={18} />
           <span>Sign Out</span>
         </button>
