@@ -17,7 +17,7 @@ export const TARIFF_RATES = {
   offPeak:  { name: 'Off-Peak',  ratePerKwh: 0.15, startHour: 0,  endHour: 7,  type: 'off-peak' as const },
 } as const;
 
-export const UK_GRID_CO2_FACTOR = 0.207; // kg CO2 per kWh (2024 UK average)
+export const UK_GRID_CO2_FACTOR = 0.182; // kg CO2 per kWh (UK grid average)
 export const GBP_SYMBOL = '£';
 export const ENERGY_UNIT = 'kWh';
 export const DEMAND_UNIT = 'kW';

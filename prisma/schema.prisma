@@ -7,17 +7,58 @@ datasource db {
   provider = "sqlite"
 }
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  SITE_MANAGER
+  VIEWER
+}
+
+enum Severity {
+  CRITICAL
+  WARNING
+  INFO
+}
+
+enum AlertCategory {
+  HVAC
+  WATER
+  LIGHTING
+  BOILER
+  OCCUPANCY
+  TARIFF
+  MAINTENANCE
+  SCHEDULING
+}
+
+enum AlertStatus {
+  OPEN
+  AGENT_ACTING
+  HUMAN_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum ActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  OVERRIDDEN
+}
+
+// ─── Auth ───────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String
-  role          String    @default("viewer") // admin | manager | viewer
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
+  id         String    @id @default(cuid())
+  email      String    @unique
+  name       String
+  password   String
+  role       Role      @default(VIEWER)
+  siteAccess Site[]    @relation("UserSiteAccess")
+  sessions   Session[]
+  createdAt  DateTime  @default(now())
 }
 
 model Session {
@@ -28,97 +69,122 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ─── Sites ───────────────────────────────────────────────────────────────────
+// ─── Sites ──────────────────────────────────────────────────────────────────
 
 model Site {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  name            String
-  city            String
-  address         String
-  postcode        String
-  latitude        Float
-  longitude       Float
-  status          String   @default("operational")
-  totalUnits      Int
-  occupiedUnits   Int      @default(0)
-  totalAreaSqm    Float    @default(0)
-  floors          Int      @default(0)
-  yearBuilt       Int      @default(2024)
-  epcRating       String   @default("B")
-  hasSmartMeters  Boolean  @default(true)
-  hasSolar        Boolean  @default(false)
-  hasBattery      Boolean  @default(false)
-  hasHeatPump     Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  readings        EnergyReading[]
-  alerts          Alert[]
-  agentActions    AgentAction[]
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  city           String
+  rooms          Int
+  totalSqm       Int
+  floors         Int
+  yearBuilt      Int
+  energyRating   String
+  hvacType       String
+  solarPanels    Boolean         @default(false)
+  smartMeters    Boolean         @default(true)
+  readings       EnergyReading[]
+  alerts         Alert[]
+  agentActions   AgentAction[]
+  agentConfig    AgentConfig?
+  savingsRecords SavingsRecord[]
+  users          User[]          @relation("UserSiteAccess")
 }
 
-// ─── Energy ──────────────────────────────────────────────────────────────────
+// ─── Energy ─────────────────────────────────────────────────────────────────
 
 model EnergyReading {
-  id                  String   @id @default(cuid())
-  siteId              String
-  timestamp           DateTime
-  consumptionKwh      Float
-  generationKwh       Float    @default(0)
-  gridImportKwh       Float    @default(0)
-  gridExportKwh       Float    @default(0)
-  solarKwh            Float    @default(0)
-  batteryChargeKwh    Float    @default(0)
-  batteryDischargeKwh Float    @default(0)
-  demandKw            Float
-  powerFactor         Float    @default(0.95)
-  voltage             Float    @default(230)
-  frequency           Float    @default(50)
-  co2Kg               Float    @default(0)
-  costGbp             Float    @default(0)
-  site                Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  createdAt           DateTime @default(now())
+  id              String   @id @default(cuid())
+  siteId          String
+  site            Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  timestamp       DateTime
+  intervalMinutes Int      @default(30)
+  hvacKwh         Float
+  waterKwh        Float
+  lightingKwh     Float
+  communalKwh     Float
+  otherKwh        Float
+  totalKwh        Float
+  optimisedKwh    Float
+  savingsKwh      Float
+  costGbp         Float
+  savingsGbp      Float
+  tariffRate      Float
+  occupancyRate   Float
+  outsideTemp     Float
+  co2Kg           Float
 
   @@index([siteId, timestamp])
 }
 
-// ─── Alerts ──────────────────────────────────────────────────────────────────
+// ─── Alerts ─────────────────────────────────────────────────────────────────
 
 model Alert {
-  id             String    @id @default(cuid())
-  siteId         String
-  level          String    @default("info") // info | warning | critical
-  category       String
-  title          String
-  message        String
-  acknowledged   Boolean   @default(false)
-  acknowledgedBy String?
-  acknowledgedAt DateTime?
-  resolved       Boolean   @default(false)
-  resolvedAt     DateTime?
-  site           Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  @@index([siteId, level])
+  id              String      @id @default(cuid())
+  siteId          String
+  site            Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  severity        Severity
+  category        AlertCategory
+  title           String
+  message         String
+  estimatedSaving Float
+  status          AlertStatus @default(OPEN)
+  agentAction     String?
+  agentActedAt    DateTime?
+  humanReviewedBy String?
+  humanReviewedAt DateTime?
+  createdAt       DateTime    @default(now())
+  resolvedAt      DateTime?
 }
 
-// ─── Agent Actions ───────────────────────────────────────────────────────────
+// ─── Agent Actions ──────────────────────────────────────────────────────────
 
 model AgentAction {
-  id          String   @id @default(cuid())
-  siteId      String
-  type        String
-  severity    String   @default("low")
-  description String
-  savingsGbp  Float    @default(0)
-  savingsKwh  Float    @default(0)
-  confidence  Float    @default(0)
-  automated   Boolean  @default(false)
-  status      String   @default("proposed")
-  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String        @id @default(cuid())
+  siteId          String
+  site            Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  category        AlertCategory
+  description     String
+  reasoning       String
+  actionTaken     String
+  autonomous      Boolean       @default(true)
+  estimatedSaving Float
+  confirmedSaving Float?
+  status          ActionStatus  @default(PENDING)
+  createdAt       DateTime      @default(now())
+  completedAt     DateTime?
+}
 
-  @@index([siteId, type])
+// ─── Savings ────────────────────────────────────────────────────────────────
+
+model SavingsRecord {
+  id           String        @id @default(cuid())
+  siteId       String
+  site         Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  month        String
+  category     AlertCategory
+  projectedGbp Float
+  actualGbp    Float
+  co2SavedKg   Float
+}
+
+// ─── Agent Config ───────────────────────────────────────────────────────────
+
+model AgentConfig {
+  id                  String  @id @default(cuid())
+  siteId              String  @unique
+  site                Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  hvacAutoSchedule    Boolean @default(true)
+  voidRoomDetection   Boolean @default(true)
+  peakAvoidance       Boolean @default(true)
+  lightingAutomation  Boolean @default(true)
+  boilerOptimisation  Boolean @default(true)
+  waterHeatingOpt     Boolean @default(true)
+  maxAutonomyLevel    Int     @default(3)
+  hvacMinTemp         Float   @default(18.0)
+  hvacMaxTemp         Float   @default(22.0)
+  nightModeStart      String  @default("23:00")
+  nightModeEnd        String  @default("06:00")
+  peakTariffThreshold Float   @default(0.35)
 }
