@@ -1,26 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
+/* ─── Fusion Brand Design Tokens ──────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core palette */
+  --fusion-primary: #37543B;
+  --fusion-primary-light: #4A6B4F;
+  --fusion-primary-dark: #2B4130;
+  --fusion-sage: #BCBD89;
+  --fusion-sage-light: #D0D1A8;
+  --fusion-copper: #A14D3D;
+  --fusion-copper-light: #C06B5A;
+  --fusion-cream: #E3E3D9;
+  --fusion-cream-light: #F0F0E9;
+  --fusion-surface: #FAFAF7;
+
+  /* Text */
+  --fusion-text: #0A0A0A;
+  --fusion-text-secondary: #6B6B6B;
+  --fusion-text-muted: #A4A4A4;
+
+  /* Semantic */
+  --fusion-success: #4A7C59;
+  --fusion-warning: #D4913B;
+  --fusion-danger: #C45B5B;
+  --fusion-info: #5B8CA4;
+
+  /* Typography */
+  --fusion-font-display: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+  --fusion-font-body: 'DM Sans', 'Century Gothic', Calibri, Arial, sans-serif;
+  --fusion-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Radius */
+  --fusion-radius-sm: 4px;
+  --fusion-radius: 8px;
+  --fusion-radius-lg: 12px;
+  --fusion-radius-xl: 16px;
+
+  /* Shadows (warm green-tinted) */
+  --fusion-shadow-sm: 0 1px 2px rgba(55, 84, 59, 0.05);
+  --fusion-shadow-md: 0 4px 6px rgba(55, 84, 59, 0.07);
+  --fusion-shadow-lg: 0 10px 15px rgba(55, 84, 59, 0.10);
+
+  /* Sidebar */
+  --sidebar-width: 260px;
 }
+
+/* ─── Tailwind 4 Theme Extension ──────────────────────────────────────────── */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colours */
+  --color-fusion-primary: var(--fusion-primary);
+  --color-fusion-primary-light: var(--fusion-primary-light);
+  --color-fusion-primary-dark: var(--fusion-primary-dark);
+  --color-fusion-sage: var(--fusion-sage);
+  --color-fusion-sage-light: var(--fusion-sage-light);
+  --color-fusion-copper: var(--fusion-copper);
+  --color-fusion-copper-light: var(--fusion-copper-light);
+  --color-fusion-cream: var(--fusion-cream);
+  --color-fusion-cream-light: var(--fusion-cream-light);
+  --color-fusion-surface: var(--fusion-surface);
+  --color-fusion-text: var(--fusion-text);
+  --color-fusion-text-secondary: var(--fusion-text-secondary);
+  --color-fusion-text-muted: var(--fusion-text-muted);
+  --color-fusion-success: var(--fusion-success);
+  --color-fusion-warning: var(--fusion-warning);
+  --color-fusion-danger: var(--fusion-danger);
+  --color-fusion-info: var(--fusion-info);
+
+  /* Fonts */
+  --font-display: var(--fusion-font-display);
+  --font-body: var(--fusion-font-body);
+  --font-mono: var(--fusion-font-mono);
+
+  /* Shadows */
+  --shadow-fusion-sm: var(--fusion-shadow-sm);
+  --shadow-fusion-md: var(--fusion-shadow-md);
+  --shadow-fusion-lg: var(--fusion-shadow-lg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ─── Base Styles ─────────────────────────────────────────────────────────── */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--fusion-font-body);
+  background: var(--fusion-cream-light);
+  color: var(--fusion-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--fusion-font-display);
+}
+
+/* ─── Scrollbar (Fusion-branded) ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--fusion-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fusion-sage);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fusion-primary-light);
+}
+
+/* ─── Selection ───────────────────────────────────────────────────────────── */
+
+::selection {
+  background: var(--fusion-sage);
+  color: var(--fusion-primary-dark);
 }

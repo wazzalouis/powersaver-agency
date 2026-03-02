@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          String    @default("viewer") // admin | manager | viewer
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Sites ───────────────────────────────────────────────────────────────────
+
+model Site {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  city            String
+  address         String
+  postcode        String
+  latitude        Float
+  longitude       Float
+  status          String   @default("operational")
+  totalUnits      Int
+  occupiedUnits   Int      @default(0)
+  totalAreaSqm    Float    @default(0)
+  floors          Int      @default(0)
+  yearBuilt       Int      @default(2024)
+  epcRating       String   @default("B")
+  hasSmartMeters  Boolean  @default(true)
+  hasSolar        Boolean  @default(false)
+  hasBattery      Boolean  @default(false)
+  hasHeatPump     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  readings        EnergyReading[]
+  alerts          Alert[]
+  agentActions    AgentAction[]
+}
+
+// ─── Energy ──────────────────────────────────────────────────────────────────
+
+model EnergyReading {
+  id                  String   @id @default(cuid())
+  siteId              String
+  timestamp           DateTime
+  consumptionKwh      Float
+  generationKwh       Float    @default(0)
+  gridImportKwh       Float    @default(0)
+  gridExportKwh       Float    @default(0)
+  solarKwh            Float    @default(0)
+  batteryChargeKwh    Float    @default(0)
+  batteryDischargeKwh Float    @default(0)
+  demandKw            Float
+  powerFactor         Float    @default(0.95)
+  voltage             Float    @default(230)
+  frequency           Float    @default(50)
+  co2Kg               Float    @default(0)
+  costGbp             Float    @default(0)
+  site                Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt           DateTime @default(now())
+
+  @@index([siteId, timestamp])
+}
+
+// ─── Alerts ──────────────────────────────────────────────────────────────────
+
+model Alert {
+  id             String    @id @default(cuid())
+  siteId         String
+  level          String    @default("info") // info | warning | critical
+  category       String
+  title          String
+  message        String
+  acknowledged   Boolean   @default(false)
+  acknowledgedBy String?
+  acknowledgedAt DateTime?
+  resolved       Boolean   @default(false)
+  resolvedAt     DateTime?
+  site           Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([siteId, level])
+}
+
+// ─── Agent Actions ───────────────────────────────────────────────────────────
+
+model AgentAction {
+  id          String   @id @default(cuid())
+  siteId      String
+  type        String
+  severity    String   @default("low")
+  description String
+  savingsGbp  Float    @default(0)
+  savingsKwh  Float    @default(0)
+  confidence  Float    @default(0)
+  automated   Boolean  @default(false)
+  status      String   @default("proposed")
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([siteId, type])
+}
