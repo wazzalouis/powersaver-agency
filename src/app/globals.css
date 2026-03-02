@@ -10,10 +10,13 @@
   --fusion-primary-dark: #2B4130;
   --fusion-sage: #BCBD89;
   --fusion-sage-light: #D0D1A8;
+  --fusion-sage-dark: #A0A16E;
   --fusion-copper: #A14D3D;
   --fusion-copper-light: #C06B5A;
+  --fusion-copper-dark: #7E3A2E;
   --fusion-cream: #E3E3D9;
   --fusion-cream-light: #F0F0E9;
+  --fusion-cream-dark: #D4D4C6;
   --fusion-surface: #FAFAF7;
 
   /* Text */
@@ -33,7 +36,7 @@
   --fusion-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Radius */
-  --fusion-radius-sm: 4px;
+  --fusion-radius-sm: 6px;
   --fusion-radius: 8px;
   --fusion-radius-lg: 12px;
   --fusion-radius-xl: 16px;
@@ -42,6 +45,8 @@
   --fusion-shadow-sm: 0 1px 2px rgba(55, 84, 59, 0.05);
   --fusion-shadow-md: 0 4px 6px rgba(55, 84, 59, 0.07);
   --fusion-shadow-lg: 0 10px 15px rgba(55, 84, 59, 0.10);
+  --fusion-shadow-xl: 0 20px 25px rgba(55, 84, 59, 0.12);
+  --fusion-shadow-glow: 0 0 20px rgba(188, 189, 137, 0.15);
 
   /* Sidebar */
   --sidebar-width: 260px;
@@ -50,24 +55,51 @@
 /* ─── Tailwind 4 Theme Extension ──────────────────────────────────────────── */
 
 @theme inline {
-  /* Colours */
+  /* Colours — full palette */
   --color-fusion-primary: var(--fusion-primary);
   --color-fusion-primary-light: var(--fusion-primary-light);
   --color-fusion-primary-dark: var(--fusion-primary-dark);
+  --color-fusion-primary-50: #EEF2EE;
+  --color-fusion-primary-100: #D5DFD6;
+  --color-fusion-primary-200: #ADBFAF;
+  --color-fusion-primary-300: #849F87;
+  --color-fusion-primary-400: #5C7F60;
+  --color-fusion-primary-500: #37543B;
+  --color-fusion-primary-600: #2F4833;
+  --color-fusion-primary-700: #263A29;
+  --color-fusion-primary-800: #1E2D20;
+  --color-fusion-primary-900: #151F17;
+
   --color-fusion-sage: var(--fusion-sage);
   --color-fusion-sage-light: var(--fusion-sage-light);
+  --color-fusion-sage-dark: var(--fusion-sage-dark);
   --color-fusion-copper: var(--fusion-copper);
   --color-fusion-copper-light: var(--fusion-copper-light);
+  --color-fusion-copper-dark: var(--fusion-copper-dark);
   --color-fusion-cream: var(--fusion-cream);
   --color-fusion-cream-light: var(--fusion-cream-light);
+  --color-fusion-cream-dark: var(--fusion-cream-dark);
   --color-fusion-surface: var(--fusion-surface);
+
   --color-fusion-text: var(--fusion-text);
   --color-fusion-text-secondary: var(--fusion-text-secondary);
   --color-fusion-text-muted: var(--fusion-text-muted);
+
+  /* Semantic status */
   --color-fusion-success: var(--fusion-success);
   --color-fusion-warning: var(--fusion-warning);
   --color-fusion-danger: var(--fusion-danger);
   --color-fusion-info: var(--fusion-info);
+
+  /* Chart colours */
+  --color-fusion-chart-green: #37543B;
+  --color-fusion-chart-sage: #BCBD89;
+  --color-fusion-chart-copper: #A14D3D;
+  --color-fusion-chart-teal: #5B8CA4;
+  --color-fusion-chart-gold: #D4913B;
+  --color-fusion-chart-blush: #C45B5B;
+  --color-fusion-chart-mint: #4A7C59;
+  --color-fusion-chart-lavender: #8B7BA4;
 
   /* Fonts */
   --font-display: var(--fusion-font-display);
@@ -78,6 +110,8 @@
   --shadow-fusion-sm: var(--fusion-shadow-sm);
   --shadow-fusion-md: var(--fusion-shadow-md);
   --shadow-fusion-lg: var(--fusion-shadow-lg);
+  --shadow-fusion-xl: var(--fusion-shadow-xl);
+  --shadow-fusion-glow: var(--fusion-shadow-glow);
 }
 
 /* ─── Base Styles ─────────────────────────────────────────────────────────── */
@@ -92,6 +126,21 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--fusion-font-display);
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────────── */
+
+.font-data {
+  font-family: var(--fusion-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.text-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fusion-text-muted);
 }
 
 /* ─── Scrollbar (Fusion-branded) ──────────────────────────────────────────── */
@@ -119,4 +168,11 @@ h1, h2, h3, h4, h5, h6 {
 ::selection {
   background: var(--fusion-sage);
   color: var(--fusion-primary-dark);
+}
+
+/* ─── Focus Ring ──────────────────────────────────────────────────────────── */
+
+.focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--fusion-cream-light), 0 0 0 4px var(--fusion-sage);
 }

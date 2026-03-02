@@ -12,9 +12,9 @@
 export const colors = {
   /** Core brand */
   primary: {
-    DEFAULT: '#37543B',    // Forest green — header, footer, dark sections
-    light:   '#4A6B4F',    // Hover / lighter variant
-    dark:    '#2B4130',    // Pressed / darker variant
+    DEFAULT: '#37543B',
+    light:   '#4A6B4F',
+    dark:    '#2B4130',
     50:      '#EEF2EE',
     100:     '#D5DFD6',
     200:     '#ADBFAF',
@@ -27,21 +27,21 @@ export const colors = {
     900:     '#151F17',
   },
 
-  /** Sage / olive accent — highlights, "POSITIVE LIVING" text, arrows, icons */
+  /** Sage / olive accent */
   sage: {
     DEFAULT: '#BCBD89',
     light:   '#D0D1A8',
     dark:    '#A0A16E',
   },
 
-  /** Copper / terracotta — CTA accent, submit buttons, alerts */
+  /** Copper / terracotta */
   copper: {
     DEFAULT: '#A14D3D',
     light:   '#C06B5A',
     dark:    '#7E3A2E',
   },
 
-  /** Warm cream — primary background, text-on-dark */
+  /** Warm cream */
   cream: {
     DEFAULT: '#E3E3D9',
     light:   '#F0F0E9',
@@ -50,16 +50,16 @@ export const colors = {
 
   /** Neutral palette */
   neutral: {
-    50:  '#FAFAF7',    // Surface white
-    100: '#F0F0E9',    // Light cream
-    200: '#E3E3D9',    // Warm cream (=cream.DEFAULT)
+    50:  '#FAFAF7',
+    100: '#F0F0E9',
+    200: '#E3E3D9',
     300: '#D4D4C6',
-    400: '#A4A4A4',    // Muted / placeholder
-    500: '#6B6B6B',    // Secondary text
-    600: '#4E4E4E',    // Body text alt
-    700: '#333333',    // Charcoal
-    800: '#181818',    // Dark surface
-    900: '#0A0A0A',    // Near black (primary text)
+    400: '#A4A4A4',
+    500: '#6B6B6B',
+    600: '#4E4E4E',
+    700: '#333333',
+    800: '#181818',
+    900: '#0A0A0A',
   },
 
   /** Semantic colours */
@@ -99,30 +99,64 @@ export const typography = {
     family: '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
     google: 'JetBrains+Mono:wght@400;500;600',
   },
-  /** Scale (px) */
+  /** Size scale */
   size: {
-    xs:   '12px',
-    sm:   '14px',
-    base: '16px',
-    lg:   '18px',
-    xl:   '20px',
-    '2xl': '24px',
-    '3xl': '30px',
-    '4xl': '36px',
-    '5xl': '48px',
+    xs:   '0.75rem',   // 12px
+    sm:   '0.875rem',  // 14px
+    base: '1rem',      // 16px
+    lg:   '1.125rem',  // 18px
+    xl:   '1.25rem',   // 20px
+    '2xl': '1.5rem',   // 24px
+    '3xl': '1.875rem', // 30px
+    '4xl': '2.25rem',  // 36px
+  },
+  /** Font weights */
+  weight: {
+    light:    300,
+    normal:   400,
+    medium:   500,
+    semibold: 600,
+    bold:     700,
+  },
+  /** Line heights */
+  lineHeight: {
+    tight:  1.2,
+    snug:   1.35,
+    normal: 1.5,
+    relaxed: 1.625,
+    loose:  2,
   },
 } as const;
 
-// ─── Spacing & Radius ────────────────────────────────────────────────────────
+// ─── Spacing ────────────────────────────────────────────────────────────────
+
+export const spacing = {
+  0:  '0px',
+  1:  '4px',
+  2:  '8px',
+  3:  '12px',
+  4:  '16px',
+  6:  '24px',
+  8:  '32px',
+  12: '48px',
+  16: '64px',
+  20: '80px',
+  24: '96px',
+  32: '128px',
+} as const;
+
+// ─── Radius ─────────────────────────────────────────────────────────────────
 
 export const radius = {
   none: '0px',
-  sm:   '4px',
+  sm:   '6px',
   md:   '8px',
   lg:   '12px',
   xl:   '16px',
   full: '9999px',
 } as const;
+
+// ─── Shadows (warm green-tinted) ────────────────────────────────────────────
 
 export const shadows = {
   sm:   '0 1px 2px rgba(55, 84, 59, 0.05)',
@@ -132,10 +166,35 @@ export const shadows = {
   glow: '0 0 20px rgba(188, 189, 137, 0.15)',
 } as const;
 
-// ─── Animation ───────────────────────────────────────────────────────────────
+// ─── Transitions ────────────────────────────────────────────────────────────
+
+export const transitions = {
+  duration: {
+    fast:   '150ms',
+    normal: '250ms',
+    slow:   '400ms',
+  },
+  timing: {
+    ease:      'cubic-bezier(0.25, 0.1, 0.25, 1.0)',
+    easeIn:    'cubic-bezier(0.4, 0, 1, 1)',
+    easeOut:   'cubic-bezier(0, 0, 0.2, 1)',
+    easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    spring:    'cubic-bezier(0.34, 1.56, 0.64, 1)',
+  },
+} as const;
+
+// ─── Breakpoints ────────────────────────────────────────────────────────────
+
+export const breakpoints = {
+  mobile:  '480px',
+  tablet:  '768px',
+  desktop: '1024px',
+  wide:    '1280px',
+} as const;
+
+// ─── Animation (Framer Motion) ──────────────────────────────────────────────
 
 export const animation = {
-  /** Framer Motion defaults — subtle, professional */
   duration: {
     fast:   0.15,
     normal: 0.3,
@@ -147,7 +206,40 @@ export const animation = {
   },
 } as const;
 
-// ─── Design Tokens (CSS custom properties) ───────────────────────────────────
+// ─── Chart-specific palettes ────────────────────────────────────────────────
+
+export const chartPalettes = {
+  /** Default 8-colour sequence for general charts */
+  default: [
+    colors.chart.green,
+    colors.chart.sage,
+    colors.chart.copper,
+    colors.chart.teal,
+    colors.chart.gold,
+    colors.chart.blush,
+    colors.chart.mint,
+    colors.chart.lavender,
+  ],
+  /** Energy type breakdown: grid vs solar vs battery */
+  energy: [
+    colors.chart.green,   // grid
+    colors.chart.gold,    // solar
+    colors.chart.teal,    // battery
+  ],
+  /** Status: operational / warning / critical */
+  status: [
+    colors.success,
+    colors.warning,
+    colors.danger,
+  ],
+  /** Comparison: this period vs last period */
+  comparison: [
+    colors.primary.DEFAULT,
+    colors.cream.dark,
+  ],
+} as const;
+
+// ─── CSS Custom Properties ──────────────────────────────────────────────────
 
 export const cssVariables = {
   '--fusion-primary':       colors.primary.DEFAULT,
@@ -159,6 +251,7 @@ export const cssVariables = {
   '--fusion-copper-light':  colors.copper.light,
   '--fusion-cream':         colors.cream.DEFAULT,
   '--fusion-cream-light':   colors.cream.light,
+  '--fusion-cream-dark':    colors.cream.dark,
   '--fusion-surface':       colors.neutral[50],
   '--fusion-text':          colors.neutral[900],
   '--fusion-text-secondary': colors.neutral[500],

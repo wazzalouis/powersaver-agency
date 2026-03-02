@@ -18,40 +18,33 @@ export default function OverviewPage() {
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <MetricCard
-          title="Total Consumption"
+          label="Total Consumption"
           value="842 MWh"
-          subtitle="Across 4 operational sites"
-          trend={-8.2}
-          trendLabel="vs last month"
+          subtext="Across 4 operational sites"
+          trend="-8.2% vs last month"
           icon={<Zap size={20} className="text-fusion-copper" />}
-          accentColor={colors.copper.DEFAULT}
         />
         <MetricCard
-          title="Energy Cost"
+          label="Energy Cost"
           value="£218,450"
-          subtitle="Month to date"
-          trend={-12.5}
-          trendLabel="vs budget"
+          subtext="Month to date"
+          trend="-12.5% vs budget"
           icon={<PoundSterling size={20} className="text-fusion-primary" />}
-          accentColor={colors.primary.DEFAULT}
+          accent
         />
         <MetricCard
-          title="Carbon Emissions"
+          label="Carbon Emissions"
           value="174 t CO₂"
-          subtitle="Down from 196t baseline"
-          trend={-11.2}
-          trendLabel="reduction"
+          subtext="Down from 196t baseline"
+          trend="-11.2% reduction"
           icon={<Leaf size={20} className="text-fusion-success" />}
-          accentColor={colors.success}
         />
         <MetricCard
-          title="AI Agent Savings"
+          label="AI Agent Savings"
           value="£34,200"
-          subtitle="142 automated actions"
-          trend={-15.7}
-          trendLabel="cost avoided"
+          subtext="142 automated actions"
+          trend="-15.7% cost avoided"
           icon={<TrendingDown size={20} className="text-fusion-sage" />}
-          accentColor={colors.sage.DEFAULT}
         />
       </div>
 
