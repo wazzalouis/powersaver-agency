@@ -1,36 +1,56 @@
 'use client';
 
-import { SiteCard } from '@/components/dashboard/SiteCard';
+import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { MapPin, BedDouble, Ruler, Leaf, ArrowRight } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { EfficiencyGauge } from '@/components/charts/EfficiencyGauge';
 import { useAuth } from '@/lib/auth-helpers';
-import type { Site } from '@/types/site';
+import { formatCurrency, formatCo2, formatNumber } from '@/lib/formatters';
 
-const demoMetrics = [
-  { consumptionKwh: 42300, costGbp: 11200, savingsPercent: 12 },
-  { consumptionKwh: 38100, costGbp: 9800, savingsPercent: 14 },
-  { consumptionKwh: 51400, costGbp: 13600, savingsPercent: 9 },
-  { consumptionKwh: 28700, costGbp: 7400, savingsPercent: 11 },
-  { consumptionKwh: 0, costGbp: 0, savingsPercent: 0 },
-  { consumptionKwh: 0, costGbp: 0, savingsPercent: 0 },
-];
+interface SiteListItem {
+  slug: string;
+  name: string;
+  city: string;
+  rooms: number;
+  totalSqm: number;
+  monthlyCost: number;
+  monthlySavings: number;
+  efficiency: number;
+  co2SavedKg: number;
+  costPerBedPerWeek: number;
+}
 
-const demoSites: Site[] = [
-  { id: 'brent-cross-town', name: 'Brent Cross Town', city: 'London', address: 'Claremont Road', postcode: 'NW2 1RG', latitude: 51.5765, longitude: -0.2218, status: 'operational', totalUnits: 434, occupiedUnits: 412, occupancyPercent: 95, totalAreaSqm: 15200, floors: 18, yearBuilt: 2024, epcRating: 'A', hasSmartMeters: true, hasSolar: true, hasBattery: true, hasHeatPump: true },
-  { id: 'liverpool', name: 'Liverpool', city: 'Liverpool', address: 'Pall Mall', postcode: 'L3 6AL', latitude: 53.4084, longitude: -2.9916, status: 'operational', totalUnits: 382, occupiedUnits: 365, occupancyPercent: 96, totalAreaSqm: 12800, floors: 14, yearBuilt: 2023, epcRating: 'B', hasSmartMeters: true, hasSolar: true, hasBattery: false, hasHeatPump: true },
-  { id: 'nottingham', name: 'Nottingham', city: 'Nottingham', address: 'Huntingdon Street', postcode: 'NG1 1AR', latitude: 52.9548, longitude: -1.1581, status: 'operational', totalUnits: 512, occupiedUnits: 488, occupancyPercent: 95, totalAreaSqm: 18500, floors: 20, yearBuilt: 2023, epcRating: 'B', hasSmartMeters: true, hasSolar: true, hasBattery: true, hasHeatPump: false },
-  { id: 'york', name: 'York', city: 'York', address: 'Lawrence Street', postcode: 'YO10 3EB', latitude: 53.9571, longitude: -1.0715, status: 'operational', totalUnits: 298, occupiedUnits: 280, occupancyPercent: 94, totalAreaSqm: 9800, floors: 10, yearBuilt: 2024, epcRating: 'A', hasSmartMeters: true, hasSolar: false, hasBattery: false, hasHeatPump: true },
-  { id: 'leeds', name: 'Leeds', city: 'Leeds', address: 'Whitehall Road', postcode: 'LS1 4AW', latitude: 53.7946, longitude: -1.5569, status: 'opening-2026', totalUnits: 450, occupiedUnits: 0, occupancyPercent: 0, totalAreaSqm: 16000, floors: 16, yearBuilt: 2026, epcRating: 'A', hasSmartMeters: true, hasSolar: true, hasBattery: true, hasHeatPump: true },
-  { id: 'manchester', name: 'Manchester', city: 'Manchester', address: 'Great Ancoats Street', postcode: 'M4 5AB', latitude: 53.4808, longitude: -2.2426, status: 'opening-2026', totalUnits: 520, occupiedUnits: 0, occupancyPercent: 0, totalAreaSqm: 19000, floors: 22, yearBuilt: 2026, epcRating: 'A', hasSmartMeters: true, hasSolar: true, hasBattery: true, hasHeatPump: true },
-];
+function SiteCardSkeleton() {
+  return (
+    <Card padding="md">
+      <Skeleton className="h-5 w-36 mb-1" />
+      <Skeleton className="h-3 w-20 mb-4" />
+      <div className="flex justify-center mb-4">
+        <Skeleton className="h-20 w-32 rounded-full" />
+      </div>
+      <div className="space-y-2">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-3/4" />
+      </div>
+    </Card>
+  );
+}
 
 export default function SitesPage() {
   const { isSiteManager, siteSlugs } = useAuth();
 
-  // Site managers only see their assigned sites (match by slug for demo data)
-  const filteredSites = demoSites.filter((site) =>
-    !isSiteManager || siteSlugs.includes(site.id)
-  );
-  const filteredMetrics = demoMetrics.filter((_, i) =>
-    !isSiteManager || siteSlugs.includes(demoSites[i].id)
+  const { data, isLoading } = useQuery<{ sites: SiteListItem[] }>({
+    queryKey: ['sites-list'],
+    queryFn: () => fetch('/api/sites/list').then((r) => r.json()),
+  });
+
+  const sites = data?.sites?.filter(
+    (s) => !isSiteManager || siteSlugs.includes(s.slug),
   );
 
   return (
@@ -42,15 +62,88 @@ export default function SitesPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSites.map((site, i) => (
-          <SiteCard
-            key={site.id}
-            site={site}
-            metrics={filteredMetrics[i]}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SiteCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : sites?.length ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sites.map((site) => (
+            <Link key={site.slug} href={`/sites/${site.slug}`}>
+              <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+                <Card padding="md" className="cursor-pointer group">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-1">
+                    <div>
+                      <h3 className="font-semibold text-fusion-text text-lg">{site.name}</h3>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <MapPin size={12} className="text-fusion-text-muted" />
+                        <span className="text-xs text-fusion-text-secondary">{site.city}</span>
+                      </div>
+                    </div>
+                    <ArrowRight
+                      size={16}
+                      className="text-fusion-text-muted group-hover:text-fusion-primary transition-colors mt-1"
+                    />
+                  </div>
+
+                  {/* Room count + sqm */}
+                  <div className="flex items-center gap-4 text-xs text-fusion-text-secondary mt-2 mb-3">
+                    <span className="flex items-center gap-1">
+                      <BedDouble size={12} />
+                      {formatNumber(site.rooms)} rooms
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Ruler size={12} />
+                      {formatNumber(site.totalSqm)} sqm
+                    </span>
+                  </div>
+
+                  {/* Efficiency gauge */}
+                  <div className="flex justify-center mb-3">
+                    <EfficiencyGauge value={site.efficiency} size={130} label="Efficiency" />
+                  </div>
+
+                  {/* Cost + savings row */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-fusion-cream-light/50 rounded-lg p-2.5">
+                      <p className="text-[10px] uppercase tracking-wide text-fusion-text-muted mb-0.5">
+                        Monthly Cost
+                      </p>
+                      <p className="text-sm font-semibold text-fusion-text">
+                        {formatCurrency(site.monthlyCost, 0)}
+                      </p>
+                    </div>
+                    <div className="bg-fusion-cream-light/50 rounded-lg p-2.5">
+                      <p className="text-[10px] uppercase tracking-wide text-fusion-text-muted mb-0.5">
+                        AI Savings
+                      </p>
+                      <p className="text-sm font-semibold text-fusion-success">
+                        {formatCurrency(site.monthlySavings, 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bottom stats */}
+                  <div className="flex items-center justify-between pt-3 border-t border-fusion-cream-dark/30">
+                    <div className="flex items-center gap-1 text-xs text-fusion-text-secondary">
+                      <Leaf size={12} className="text-fusion-success" />
+                      {formatCo2(site.co2SavedKg)} saved
+                    </div>
+                    <Badge variant="neutral" size="sm">
+                      {formatCurrency(site.costPerBedPerWeek)}/bed/wk
+                    </Badge>
+                  </div>
+                </Card>
+              </motion.div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-fusion-text-muted py-8 text-center">No site data available</p>
+      )}
     </div>
   );
 }
