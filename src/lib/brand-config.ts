@@ -269,7 +269,7 @@ export const cssVariables = {
 // ─── Site Locations ──────────────────────────────────────────────────────────
 
 export const fusionLocations = [
-  { id: 'brent-cross',  name: 'Brent Cross Town', city: 'London',     status: 'operational' as const, units: 434 },
+  { id: 'brent-cross-town', name: 'Brent Cross Town', city: 'London',  status: 'operational' as const, units: 434 },
   { id: 'liverpool',    name: 'Liverpool',        city: 'Liverpool',   status: 'operational' as const, units: 382 },
   { id: 'nottingham',   name: 'Nottingham',       city: 'Nottingham',  status: 'operational' as const, units: 512 },
   { id: 'york',         name: 'York',             city: 'York',        status: 'operational' as const, units: 298 },
