@@ -96,6 +96,9 @@ const ACTION_TEMPLATES = [
 
 async function main() {
   console.log('Clearing existing data...');
+  await prisma.auditLog.deleteMany();
+  await prisma.notificationPreferences.deleteMany();
+  await prisma.platformSettings.deleteMany();
   await prisma.savingsRecord.deleteMany();
   await prisma.agentConfig.deleteMany();
   await prisma.agentAction.deleteMany();
@@ -423,6 +426,71 @@ async function main() {
 
   console.log(`  Created ${savingsCount} savings records`);
 
+  // ── 8. Platform Settings ──────────────────────────────────────────────
+
+  console.log('Creating platform settings...');
+  await prisma.platformSettings.create({
+    data: { id: 'platform', agentActive: true, globalAutonomy: 3 },
+  });
+
+  // ── 9. Notification Preferences ───────────────────────────────────────
+
+  console.log('Creating notification preferences...');
+  await prisma.notificationPreferences.create({
+    data: {
+      id: 'notifications',
+      alertLevel: 'CRITICAL_WARNING',
+      recipientEmails: JSON.stringify([
+        'admin@fusionstudents.co.uk',
+        'ops@fusionstudents.co.uk',
+      ]),
+      dailyDigest: true,
+      dailyDigestTime: '08:00',
+      weeklyReport: true,
+      weeklyReportDay: 'MONDAY',
+    },
+  });
+
+  // ── 10. Audit Log (sample entries) ────────────────────────────────────
+
+  console.log('Creating audit log entries...');
+  const auditEntries = [
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Changed Global Autonomy Level', entity: 'PlatformSettings', entityId: 'platform', previousValue: '2', newValue: '3', daysAgo: 28 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Enabled AI Agent', entity: 'PlatformSettings', entityId: 'platform', previousValue: 'false', newValue: 'true', daysAgo: 30 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Updated HVAC Max Temperature', entity: 'AgentConfig', entityId: 'york', previousValue: '22.0', newValue: '21.0', daysAgo: 25 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Disabled Peak Tariff Avoidance', entity: 'AgentConfig', entityId: 'leeds', previousValue: 'true', newValue: 'false', daysAgo: 22 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Changed Alert Level', entity: 'NotificationPreferences', entityId: 'notifications', previousValue: 'CRITICAL', newValue: 'CRITICAL_WARNING', daysAgo: 20 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Added Notification Recipient', entity: 'NotificationPreferences', entityId: 'notifications', previousValue: '["admin@fusionstudents.co.uk"]', newValue: '["admin@fusionstudents.co.uk","ops@fusionstudents.co.uk"]', daysAgo: 20 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Enabled Daily Digest', entity: 'NotificationPreferences', entityId: 'notifications', previousValue: 'false', newValue: 'true', daysAgo: 18 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Updated Night Mode Start', entity: 'AgentConfig', entityId: 'brent-cross-town', previousValue: '22:00', newValue: '23:00', daysAgo: 15 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Updated Peak Tariff Threshold', entity: 'AgentConfig', entityId: 'nottingham', previousValue: '0.30', newValue: '0.35', daysAgo: 12 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Disabled Boiler Optimisation', entity: 'AgentConfig', entityId: 'manchester', previousValue: 'true', newValue: 'false', daysAgo: 10 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Set Autonomy Level to Suggest', entity: 'AgentConfig', entityId: 'manchester', previousValue: '3', newValue: '2', daysAgo: 10 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Updated HVAC Min Temperature', entity: 'AgentConfig', entityId: 'liverpool', previousValue: '18.0', newValue: '17.5', daysAgo: 7 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Enabled Water Heating Optimisation', entity: 'AgentConfig', entityId: 'york', previousValue: 'false', newValue: 'true', daysAgo: 5 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Changed Weekly Report Day', entity: 'NotificationPreferences', entityId: 'notifications', previousValue: 'FRIDAY', newValue: 'MONDAY', daysAgo: 3 },
+    { userId: admin.id, userName: 'Portfolio Manager', action: 'Updated HVAC Max Temperature', entity: 'AgentConfig', entityId: 'brent-cross-town', previousValue: '23.0', newValue: '22.0', daysAgo: 1 },
+  ];
+
+  for (const entry of auditEntries) {
+    const createdAt = new Date();
+    createdAt.setDate(createdAt.getDate() - entry.daysAgo);
+    createdAt.setHours(9 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60));
+    await prisma.auditLog.create({
+      data: {
+        userId: entry.userId,
+        userName: entry.userName,
+        action: entry.action,
+        entity: entry.entity,
+        entityId: entry.entityId,
+        previousValue: entry.previousValue,
+        newValue: entry.newValue,
+        createdAt,
+      },
+    });
+  }
+  console.log(`  Created ${auditEntries.length} audit log entries`);
+
   // ── Summary ─────────────────────────────────────────────────────────────
 
   console.log('\n=== Seed Complete ===');
@@ -433,6 +501,9 @@ async function main() {
   console.log(`Alerts:         ${alertCount}`);
   console.log(`Agent Actions:  ${actionCount}`);
   console.log(`Savings Records:${savingsCount}`);
+  console.log(`Audit Logs:     ${auditEntries.length}`);
+  console.log(`Platform Settings: 1`);
+  console.log(`Notification Prefs: 1`);
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

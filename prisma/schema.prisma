@@ -188,3 +188,41 @@ model AgentConfig {
   nightModeEnd        String  @default("06:00")
   peakTariffThreshold Float   @default(0.35)
 }
+
+// ─── Platform Settings (singleton) ──────────────────────────────────────────
+
+model PlatformSettings {
+  id              String   @id @default("platform")
+  agentActive     Boolean  @default(true)
+  globalAutonomy  Int      @default(3)
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── Notification Preferences (singleton) ───────────────────────────────────
+
+model NotificationPreferences {
+  id              String   @id @default("notifications")
+  alertLevel      String   @default("CRITICAL")
+  recipientEmails String   @default("[]")
+  dailyDigest     Boolean  @default(false)
+  dailyDigestTime String   @default("08:00")
+  weeklyReport    Boolean  @default(true)
+  weeklyReportDay String   @default("MONDAY")
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── Audit Log ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String
+  userName      String
+  action        String
+  entity        String
+  entityId      String?
+  previousValue String
+  newValue      String
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+}
