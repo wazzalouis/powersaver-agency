@@ -15,7 +15,7 @@ import { EfficiencyGauge } from '@/components/charts/EfficiencyGauge';
 import { ConsumptionHeatmap } from '@/components/charts/ConsumptionHeatmap';
 import { useAuth } from '@/lib/auth-helpers';
 import { AccessDenied } from '@/components/auth/AccessDenied';
-import { formatCurrency, formatCo2, formatRelative } from '@/lib/formatters';
+import { formatCurrency, formatCo2, formatRelative, formatNumber, fetchJson } from '@/lib/formatters';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -127,7 +127,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
 
   const { data, isLoading } = useQuery<SiteDetail>({
     queryKey: ['site-detail', siteId],
-    queryFn: () => fetch(`/api/sites/${siteId}`).then((r) => r.json()),
+    queryFn: () => fetchJson(`/api/sites/${siteId}`),
   });
 
   if (authLoading) return null;
@@ -169,7 +169,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                 </Badge>
                 <Badge variant="neutral" size="sm">
                   <span className="flex items-center gap-1">
-                    <Building2 size={11} /> {site.totalSqm.toLocaleString()} sqm
+                    <Building2 size={11} /> {formatNumber(site.totalSqm)} sqm
                   </span>
                 </Badge>
                 <Badge variant="neutral" size="sm">
@@ -271,7 +271,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
       {/* ── SECTION 3: CONSUMPTION HEATMAP ─────────────────────────────────── */}
       <div className="mb-6">
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
             Consumption Heatmap &mdash; Last 7 Days
           </h3>
           {isLoading ? (
@@ -291,7 +291,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
       {/* ── SECTION 4: ROOM TYPE ANALYSIS ──────────────────────────────────── */}
       <div className="mb-6">
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
             Room Type Analysis
           </h3>
           {isLoading ? (
@@ -339,7 +339,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
                         {rt.occupied}
                       </td>
                       <td className="py-2.5 px-3 text-right text-fusion-text-secondary font-mono">
-                        {rt.avgKwhPerWeek}
+                        {formatNumber(rt.avgKwhPerWeek, 1)}
                       </td>
                       <td className="py-2.5 px-3 text-right text-fusion-text-secondary font-mono">
                         {formatCurrency(rt.costPerRoomPerWeek)}
@@ -362,7 +362,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Alerts */}
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
             Site Alerts
           </h3>
           {isLoading ? (
@@ -428,7 +428,7 @@ export default function SiteDetailPage({ params }: { params: Promise<{ siteId: s
 
         {/* Agent Actions */}
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
             Agent Actions
           </h3>
           {isLoading ? (

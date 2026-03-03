@@ -11,35 +11,43 @@ const MONTHS = [
 ];
 
 export async function GET(req: NextRequest) {
-  const siteSlug = req.nextUrl.searchParams.get('siteId');
-  const siteFilter = siteSlug ? { site: { slug: siteSlug } } : {};
+  try {
+    const siteSlug = req.nextUrl.searchParams.get('siteId');
+    const siteFilter = siteSlug ? { site: { slug: siteSlug } } : {};
 
-  // Run 6 aggregate queries in parallel (one per month)
-  const monthlyAggs = await Promise.all(
-    MONTHS.map(async (m) => {
-      const start = new Date(m.year, m.month - 1, 1);
-      const end = new Date(m.year, m.month, 0, 23, 59, 59, 999);
+    // Run 6 aggregate queries in parallel (one per month)
+    const monthlyAggs = await Promise.all(
+      MONTHS.map(async (m) => {
+        const start = new Date(m.year, m.month - 1, 1);
+        const end = new Date(m.year, m.month, 0, 23, 59, 59, 999);
 
-      const agg = await prisma.energyReading.aggregate({
-        _sum: { costGbp: true, savingsGbp: true },
-        where: {
-          timestamp: { gte: start, lte: end },
-          ...siteFilter,
-        },
-      });
+        const agg = await prisma.energyReading.aggregate({
+          _sum: { costGbp: true, savingsGbp: true },
+          where: {
+            timestamp: { gte: start, lte: end },
+            ...siteFilter,
+          },
+        });
 
-      const withoutAI = Math.round(agg._sum.costGbp ?? 0);
-      const savings = Math.round(agg._sum.savingsGbp ?? 0);
+        const withoutAI = Math.round(agg._sum.costGbp ?? 0);
+        const savings = Math.round(agg._sum.savingsGbp ?? 0);
 
-      return {
-        month: m.label,
-        withoutAI,
-        aiOptimised: withoutAI - savings,
-      };
-    }),
-  );
+        return {
+          month: m.label,
+          withoutAI,
+          aiOptimised: withoutAI - savings,
+        };
+      }),
+    );
 
-  const savedYtd = monthlyAggs.reduce((sum, m) => sum + (m.withoutAI - m.aiOptimised), 0);
+    const savedYtd = monthlyAggs.reduce((sum, m) => sum + (m.withoutAI - m.aiOptimised), 0);
 
-  return NextResponse.json({ months: monthlyAggs, savedYtd });
+    return NextResponse.json({ months: monthlyAggs, savedYtd });
+  } catch (error) {
+    console.error('[ENERGY_MONTHLY] error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

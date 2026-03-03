@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EfficiencyGauge } from '@/components/charts/EfficiencyGauge';
 import { useAuth } from '@/lib/auth-helpers';
-import { formatCurrency, formatCo2, formatNumber } from '@/lib/formatters';
+import { formatCurrency, formatCo2, formatNumber, fetchJson } from '@/lib/formatters';
 
 interface SiteListItem {
   slug: string;
@@ -46,7 +46,7 @@ export default function SitesPage() {
 
   const { data, isLoading } = useQuery<{ sites: SiteListItem[] }>({
     queryKey: ['sites-list'],
-    queryFn: () => fetch('/api/sites/list').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/sites/list'),
   });
 
   const sites = data?.sites?.filter(
@@ -77,7 +77,7 @@ export default function SitesPage() {
                   {/* Header */}
                   <div className="flex items-start justify-between mb-1">
                     <div>
-                      <h3 className="font-semibold text-fusion-text text-lg">{site.name}</h3>
+                      <h3 className="font-semibold font-body text-fusion-text text-lg">{site.name}</h3>
                       <div className="flex items-center gap-1 mt-0.5">
                         <MapPin size={12} className="text-fusion-text-muted" />
                         <span className="text-xs text-fusion-text-secondary">{site.city}</span>

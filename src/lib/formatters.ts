@@ -1,5 +1,12 @@
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 
+/** Fetch JSON with error handling — throws on non-OK responses */
+export async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
 /** Format GBP currency */
 export function formatCurrency(amount: number, decimals = 2): string {
   return new Intl.NumberFormat('en-GB', {

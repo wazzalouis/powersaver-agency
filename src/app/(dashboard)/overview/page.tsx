@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { MonthlyComparisonChart } from '@/components/charts/MonthlyComparisonChart';
 import { EnergyBreakdownChart } from '@/components/charts/EnergyBreakdownChart';
 import { useDashboardStore } from '@/stores/dashboard-store';
-import { formatCurrency, formatRelative } from '@/lib/formatters';
+import { formatCurrency, formatRelative, formatNumber, fetchJson } from '@/lib/formatters';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -114,7 +114,7 @@ const siteColumns: Column<SiteRow>[] = [
     header: 'Cost/Bed/Wk',
     sortable: true,
     className: 'font-data text-right',
-    render: (r) => `£${r.costPerBedPerWeek.toFixed(2)}`,
+    render: (r) => formatCurrency(r.costPerBedPerWeek),
   },
   {
     key: 'savingsMtd',
@@ -180,32 +180,32 @@ export default function OverviewPage() {
   // KPIs — refetch every 30s
   const { data: kpis, isLoading: kpisLoading } = useQuery<OverviewKpis>({
     queryKey: ['overview-kpis', timeRange, selectedSiteId],
-    queryFn: () => fetch(`/api/energy/overview?${params}`).then((r) => r.json()),
+    queryFn: () => fetchJson(`/api/energy/overview?${params}`),
     refetchInterval: 30_000,
   });
 
   // Monthly comparison
   const { data: monthly, isLoading: monthlyLoading } = useQuery<MonthlyData>({
     queryKey: ['monthly-comparison', selectedSiteId],
-    queryFn: () => fetch(`/api/energy/monthly?${selectedSiteId ? `siteId=${selectedSiteId}` : ''}`).then((r) => r.json()),
+    queryFn: () => fetchJson(`/api/energy/monthly?${selectedSiteId ? `siteId=${selectedSiteId}` : ''}`),
   });
 
   // Energy breakdown
   const { data: breakdown, isLoading: breakdownLoading } = useQuery<BreakdownData>({
     queryKey: ['energy-breakdown', timeRange, selectedSiteId],
-    queryFn: () => fetch(`/api/energy/breakdown?${params}`).then((r) => r.json()),
+    queryFn: () => fetchJson(`/api/energy/breakdown?${params}`),
   });
 
   // Sites table
   const { data: sitesData, isLoading: sitesLoading } = useQuery<{ sites: SiteRow[] }>({
     queryKey: ['sites-performance', timeRange],
-    queryFn: () => fetch(`/api/sites?range=${timeRange}`).then((r) => r.json()),
+    queryFn: () => fetchJson(`/api/sites?range=${timeRange}`),
   });
 
   // Recent agent actions
   const { data: agentData, isLoading: agentLoading } = useQuery<{ actions: AgentActionRow[] }>({
     queryKey: ['agent-recent'],
-    queryFn: () => fetch('/api/agent/recent').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/agent/recent'),
   });
 
   return (
@@ -224,7 +224,7 @@ export default function OverviewPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <MetricCard
             label="Portfolio Energy Cost"
-            value={`£${kpis.portfolioCost.toLocaleString()}`}
+            value={formatCurrency(kpis.portfolioCost, 0)}
             subtext={kpis.periodLabel}
             trend={`${kpis.portfolioCostTrend > 0 ? '+' : ''}${kpis.portfolioCostTrend}%`}
             icon={<PoundSterling size={20} className="text-fusion-primary" />}
@@ -232,23 +232,23 @@ export default function OverviewPage() {
           />
           <MetricCard
             label="AI Agent Savings"
-            value={`£${kpis.aiSavings.toLocaleString()}`}
+            value={formatCurrency(kpis.aiSavings, 0)}
             subtext={kpis.periodLabel}
             trend={`${kpis.aiSavingsTrend > 0 ? '+' : ''}${kpis.aiSavingsTrend}%`}
             icon={<Brain size={20} className="text-fusion-sage" />}
           />
           <MetricCard
             label="CO₂ Reduced"
-            value={`${kpis.co2Reduced}t`}
+            value={`${formatNumber(kpis.co2Reduced)}t`}
             subtext={`tonnes ${kpis.periodLabel}`}
             trend={`${kpis.co2ReducedTrend > 0 ? '+' : ''}${kpis.co2ReducedTrend}%`}
             icon={<Leaf size={20} className="text-fusion-success" />}
           />
           <MetricCard
             label="Avg Cost Per Bed/Wk"
-            value={`£${kpis.costPerBedPerWeek.toFixed(2)}`}
+            value={formatCurrency(kpis.costPerBedPerWeek)}
             subtext="across portfolio"
-            trend={`${kpis.costPerBedChange < 0 ? '-' : '+'}£${Math.abs(kpis.costPerBedChange).toFixed(2)}`}
+            trend={`${kpis.costPerBedChange < 0 ? '' : '+'}${formatCurrency(kpis.costPerBedChange)}`}
             icon={<BedDouble size={20} className="text-fusion-copper" />}
           />
           <MetricCard
@@ -266,7 +266,7 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
         {/* Monthly Cost Comparison */}
         <Card padding="md" className="lg:col-span-2">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">Monthly Cost Comparison</h3>
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">Monthly Cost Comparison</h3>
           {monthlyLoading ? (
             <div className="h-[300px] flex flex-col gap-3 pt-4">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -280,7 +280,7 @@ export default function OverviewPage() {
 
         {/* Energy Breakdown */}
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">Energy Breakdown</h3>
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">Energy Breakdown</h3>
           {breakdownLoading ? (
             <div className="space-y-3 pt-4">
               <Skeleton className="h-[200px] w-full rounded-full mx-auto max-w-[160px]" />
@@ -297,7 +297,7 @@ export default function OverviewPage() {
       {/* ── SECTION 3: SITE PERFORMANCE TABLE ───────────────────────── */}
       <div className="mt-6">
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">Site Performance</h3>
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">Site Performance</h3>
           <DataTable
             columns={siteColumns}
             data={sitesData?.sites ?? []}
@@ -312,7 +312,7 @@ export default function OverviewPage() {
       <div className="mt-6">
         <Card padding="md">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-fusion-text">Recent Agent Actions</h3>
+            <h3 className="text-sm font-medium font-body text-fusion-text">Recent Agent Actions</h3>
             <button
               onClick={() => router.push('/agent')}
               className="text-xs text-fusion-copper hover:text-fusion-copper-dark font-medium flex items-center gap-1 transition-colors"
@@ -343,7 +343,7 @@ export default function OverviewPage() {
                   </span>
                   {action.estimatedSaving > 0 && (
                     <Badge variant="success" size="sm">
-                      £{Math.round(action.estimatedSaving)}
+                      {formatCurrency(Math.round(action.estimatedSaving), 0)}
                     </Badge>
                   )}
                 </div>

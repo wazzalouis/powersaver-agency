@@ -8,7 +8,7 @@ import { MetricCard } from '@/components/dashboard/MetricCard';
 import { ActionImpactTimeline } from '@/components/charts/ActionImpactTimeline';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/lib/auth-helpers';
-import { formatCurrency, formatRelative } from '@/lib/formatters';
+import { formatCurrency, formatRelative, fetchJson } from '@/lib/formatters';
 import { colors } from '@/lib/brand-config';
 import {
   Brain,
@@ -108,7 +108,7 @@ export default function AgentPage() {
 
   const { data, isLoading } = useQuery<AgentData>({
     queryKey: ['agent'],
-    queryFn: () => fetch('/api/agent').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/agent'),
     refetchInterval: 60_000,
   });
 
@@ -176,7 +176,7 @@ export default function AgentPage() {
 
       {/* ── Section 2: Live Alerts & Actions ──────────────────────────── */}
       <Card padding="md" className="mb-6">
-        <h3 className="text-sm font-medium text-fusion-text mb-4">Live Alerts & Agent Actions</h3>
+        <h3 className="text-sm font-medium font-body text-fusion-text mb-4">Live Alerts & Agent Actions</h3>
 
         {/* Filter bar */}
         <div className="flex flex-wrap gap-3 mb-5">
@@ -263,7 +263,7 @@ export default function AgentPage() {
 
       {/* ── Section 3: Action Impact Timeline ─────────────────────────── */}
       <Card padding="md">
-        <h3 className="text-sm font-medium text-fusion-text mb-4">
+        <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
           Action Impact Timeline (30 Days)
         </h3>
         <ActionImpactTimeline data={data?.timeline ?? []} />
@@ -289,15 +289,15 @@ function FilterGroup({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[11px] font-medium text-fusion-text-muted uppercase tracking-wide">
+      <span className="text-[11px] font-medium text-fusion-text-muted uppercase tracking-wide shrink-0">
         {label}
       </span>
-      <div className="flex rounded-[var(--fusion-radius)] overflow-hidden border border-fusion-cream-dark/40">
+      <div className="flex flex-wrap rounded-[var(--fusion-radius)] overflow-hidden border border-fusion-cream-dark/40">
         {options.map((opt) => (
           <button
             key={opt}
             onClick={() => onChange(opt)}
-            className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+            className={`px-2.5 py-1 text-[11px] font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-inset focus:ring-fusion-sage ${
               value === opt
                 ? 'bg-fusion-primary text-white'
                 : 'bg-white text-fusion-text-secondary hover:bg-fusion-cream-light'

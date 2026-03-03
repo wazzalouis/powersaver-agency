@@ -15,7 +15,7 @@ import {
   FileSpreadsheet,
   Calendar,
 } from 'lucide-react';
-import { formatCurrency, formatNumber } from '@/lib/formatters';
+import { formatCurrency, formatNumber, fetchJson } from '@/lib/formatters';
 import { colors } from '@/lib/brand-config';
 import { useState, useCallback } from 'react';
 
@@ -76,7 +76,7 @@ export default function SavingsPage() {
 
   const { data, isLoading } = useQuery<SavingsData>({
     queryKey: ['savings'],
-    queryFn: () => fetch('/api/savings').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/savings'),
     refetchInterval: 300_000, // 5 min
   });
 
@@ -88,11 +88,11 @@ export default function SavingsPage() {
     // KPIs
     rows.push(['=== SAVINGS & ROI REPORT ===']);
     rows.push([]);
-    rows.push(['Annual Projected Savings', `£${data.kpis.annualProjectedSavings.toLocaleString()}`]);
+    rows.push(['Annual Projected Savings', formatCurrency(data.kpis.annualProjectedSavings, 0)]);
     rows.push(['ROI on AI Agent', `${data.kpis.roi}%`]);
     rows.push(['Payback Period', data.kpis.paybackDays ? `${data.kpis.paybackDays} days` : 'N/A']);
-    rows.push(['Total Investment', `£${data.kpis.totalInvestment.toLocaleString()}`]);
-    rows.push(['Total Actual Savings', `£${data.kpis.totalActualSavings.toLocaleString()}`]);
+    rows.push(['Total Investment', formatCurrency(data.kpis.totalInvestment, 0)]);
+    rows.push(['Total Actual Savings', formatCurrency(data.kpis.totalActualSavings, 0)]);
     rows.push([]);
 
     // Category breakdown
@@ -253,7 +253,7 @@ export default function SavingsPage() {
       doc.text(formatCurrency(site.monthlyCost, 0), 70, y);
       doc.text(formatCurrency(site.monthlySavings, 0), 100, y);
       doc.text(`${site.savingsPercent}%`, 130, y);
-      doc.text(`${site.co2Saved.toLocaleString()} kg`, 152, y);
+      doc.text(`${formatNumber(site.co2Saved)} kg`, 152, y);
       doc.text(formatCurrency(site.annualProjection, 0), 175, y);
       y += 6;
     }
@@ -266,7 +266,7 @@ export default function SavingsPage() {
     doc.text(formatCurrency(data.siteTotals.monthlyCost, 0), 70, y);
     doc.text(formatCurrency(data.siteTotals.monthlySavings, 0), 100, y);
     doc.text(`${data.siteTotals.savingsPercent}%`, 130, y);
-    doc.text(`${data.siteTotals.co2Saved.toLocaleString()} kg`, 152, y);
+    doc.text(`${formatNumber(data.siteTotals.co2Saved)} kg`, 152, y);
     doc.text(formatCurrency(data.siteTotals.annualProjection, 0), 175, y);
 
     // Footer
@@ -419,7 +419,7 @@ export default function SavingsPage() {
             Per-site financial performance with annual projections
           </p>
         </div>
-        <DataTable<SiteRow> columns={siteColumns} data={siteData} />
+        <DataTable<SiteRow> columns={siteColumns} data={siteData} emptyMessage="No site savings data available" />
         {/* Totals row */}
         <div className="mt-0 border-t-2 border-fusion-primary/20">
           <div className="flex items-center px-4 py-3 bg-fusion-cream-light/50 rounded-b-lg">
@@ -457,19 +457,14 @@ export default function SavingsPage() {
         <div className="flex flex-wrap items-center gap-4">
           <button
             onClick={handleExportPDF}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
-            style={{ background: colors.primary.DEFAULT }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-colors bg-fusion-primary hover:bg-fusion-primary-dark focus:outline-none focus:ring-2 focus:ring-fusion-sage focus:ring-offset-2"
           >
             <FileDown size={16} />
             Export PDF Report
           </button>
           <button
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border"
-            style={{
-              borderColor: colors.primary.DEFAULT,
-              color: colors.primary.DEFAULT,
-            }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors border border-fusion-primary text-fusion-primary hover:bg-fusion-primary/5 focus:outline-none focus:ring-2 focus:ring-fusion-sage focus:ring-offset-2"
           >
             <FileSpreadsheet size={16} />
             Export CSV
@@ -479,7 +474,7 @@ export default function SavingsPage() {
             <span className="text-sm text-fusion-text-secondary">Schedule Monthly Report</span>
             <button
               onClick={() => setScheduleEnabled(!scheduleEnabled)}
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-fusion-sage focus:ring-offset-2"
               style={{
                 background: scheduleEnabled ? colors.primary.DEFAULT : colors.cream.dark,
               }}

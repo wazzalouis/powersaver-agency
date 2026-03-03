@@ -15,7 +15,7 @@ import { ConsumptionAreaChart } from '@/components/charts/ConsumptionAreaChart';
 import { SystemBreakdownChart } from '@/components/charts/SystemBreakdownChart';
 import { SparklineChart } from '@/components/charts/SparklineChart';
 import { useAuth } from '@/lib/auth-helpers';
-import { formatKw, formatCurrency } from '@/lib/formatters';
+import { formatKw, formatCurrency, fetchJson } from '@/lib/formatters';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -129,25 +129,25 @@ export default function RealtimePage() {
 
   const { data: kpis, isLoading: kpisLoading } = useQuery<RealtimeKpis>({
     queryKey: ['realtime-kpis'],
-    queryFn: () => fetch('/api/realtime/kpis').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/realtime/kpis'),
     refetchInterval: 30_000,
   });
 
   const { data: consumption, isLoading: consumptionLoading } = useQuery<ConsumptionData>({
     queryKey: ['realtime-consumption'],
-    queryFn: () => fetch('/api/realtime/consumption').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/realtime/consumption'),
     refetchInterval: 30_000,
   });
 
   const { data: breakdown, isLoading: breakdownLoading } = useQuery<BreakdownData>({
     queryKey: ['realtime-breakdown'],
-    queryFn: () => fetch('/api/realtime/breakdown').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/realtime/breakdown'),
     refetchInterval: 30_000,
   });
 
   const { data: sitesData, isLoading: sitesLoading } = useQuery<{ sites: SiteData[] }>({
     queryKey: ['realtime-sites'],
-    queryFn: () => fetch('/api/realtime/sites').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/realtime/sites'),
     refetchInterval: 30_000,
   });
 
@@ -166,7 +166,7 @@ export default function RealtimePage() {
   return (
     <div>
       {/* ── Header ────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-display text-fusion-text">Real-time Monitoring</h1>
           <p className="text-sm text-fusion-text-secondary mt-0.5">
@@ -219,7 +219,7 @@ export default function RealtimePage() {
           />
           <MetricCard
             label="Peak Avoidance"
-            value={`${kpis.kwShifted} kW`}
+            value={formatKw(kpis.kwShifted)}
             subtext="shifted to off-peak"
             trend={`today: ${formatCurrency(kpis.peakSavingsToday, 0)} saved`}
             icon={<TrendingDown size={20} className="text-fusion-success" />}
@@ -230,7 +230,7 @@ export default function RealtimePage() {
       {/* ── SECTION 2: 24-HOUR CONSUMPTION CHART ──────────────────────── */}
       <div className="mt-6">
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
             24-Hour Consumption &mdash; Actual vs AI-Optimised
           </h3>
           {consumptionLoading ? (
@@ -248,7 +248,7 @@ export default function RealtimePage() {
       {/* ── SECTION 3: SYSTEM BREAKDOWN ───────────────────────────────── */}
       <div className="mt-6">
         <Card padding="md">
-          <h3 className="text-sm font-medium text-fusion-text mb-4">
+          <h3 className="text-sm font-medium font-body text-fusion-text mb-4">
             System Breakdown &mdash; Consumption by Category
           </h3>
           {breakdownLoading ? (
@@ -267,7 +267,7 @@ export default function RealtimePage() {
 
       {/* ── SECTION 4: LIVE SITE GRID ─────────────────────────────────── */}
       <div className="mt-6">
-        <h3 className="text-sm font-medium text-fusion-text mb-4">Live Site Status</h3>
+        <h3 className="text-sm font-medium font-body text-fusion-text mb-4">Live Site Status</h3>
         {sitesLoading ? (
           <SiteGridSkeleton />
         ) : sitesData?.sites?.length ? (

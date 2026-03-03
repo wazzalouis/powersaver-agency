@@ -35,60 +35,68 @@ const SITE_LABELS: Record<string, string> = {
 // ── GET — return all settings ───────────────────────────────────────────────
 
 export async function GET() {
-  const [platform, notifications, agentConfigs] = await Promise.all([
-    prisma.platformSettings.findFirst(),
-    prisma.notificationPreferences.findFirst(),
-    prisma.agentConfig.findMany({
-      include: { site: { select: { id: true, name: true, slug: true } } },
-      orderBy: { site: { name: 'asc' } },
-    }),
-  ]);
+  try {
+    const [platform, notifications, agentConfigs] = await Promise.all([
+      prisma.platformSettings.findFirst(),
+      prisma.notificationPreferences.findFirst(),
+      prisma.agentConfig.findMany({
+        include: { site: { select: { id: true, name: true, slug: true } } },
+        orderBy: { site: { name: 'asc' } },
+      }),
+    ]);
 
-  const platformData = platform ?? { agentActive: true, globalAutonomy: 3 };
-  const notificationData = notifications ?? {
-    alertLevel: 'CRITICAL',
-    recipientEmails: '[]',
-    dailyDigest: false,
-    dailyDigestTime: '08:00',
-    weeklyReport: true,
-    weeklyReportDay: 'MONDAY',
-  };
+    const platformData = platform ?? { agentActive: true, globalAutonomy: 3 };
+    const notificationData = notifications ?? {
+      alertLevel: 'CRITICAL',
+      recipientEmails: '[]',
+      dailyDigest: false,
+      dailyDigestTime: '08:00',
+      weeklyReport: true,
+      weeklyReportDay: 'MONDAY',
+    };
 
-  return NextResponse.json({
-    platform: {
-      agentActive: platformData.agentActive,
-      globalAutonomy: platformData.globalAutonomy,
-    },
-    notifications: {
-      alertLevel: notificationData.alertLevel,
-      recipientEmails: JSON.parse(
-        typeof notificationData.recipientEmails === 'string'
-          ? notificationData.recipientEmails
-          : '[]',
-      ),
-      dailyDigest: notificationData.dailyDigest,
-      dailyDigestTime: notificationData.dailyDigestTime,
-      weeklyReport: notificationData.weeklyReport,
-      weeklyReportDay: notificationData.weeklyReportDay,
-    },
-    sites: agentConfigs.map((c) => ({
-      siteId: c.siteId,
-      siteName: c.site.name,
-      siteSlug: c.site.slug,
-      hvacAutoSchedule: c.hvacAutoSchedule,
-      voidRoomDetection: c.voidRoomDetection,
-      peakAvoidance: c.peakAvoidance,
-      lightingAutomation: c.lightingAutomation,
-      boilerOptimisation: c.boilerOptimisation,
-      waterHeatingOpt: c.waterHeatingOpt,
-      maxAutonomyLevel: c.maxAutonomyLevel,
-      hvacMinTemp: c.hvacMinTemp,
-      hvacMaxTemp: c.hvacMaxTemp,
-      nightModeStart: c.nightModeStart,
-      nightModeEnd: c.nightModeEnd,
-      peakTariffThreshold: c.peakTariffThreshold,
-    })),
-  });
+    return NextResponse.json({
+      platform: {
+        agentActive: platformData.agentActive,
+        globalAutonomy: platformData.globalAutonomy,
+      },
+      notifications: {
+        alertLevel: notificationData.alertLevel,
+        recipientEmails: JSON.parse(
+          typeof notificationData.recipientEmails === 'string'
+            ? notificationData.recipientEmails
+            : '[]',
+        ),
+        dailyDigest: notificationData.dailyDigest,
+        dailyDigestTime: notificationData.dailyDigestTime,
+        weeklyReport: notificationData.weeklyReport,
+        weeklyReportDay: notificationData.weeklyReportDay,
+      },
+      sites: agentConfigs.map((c) => ({
+        siteId: c.siteId,
+        siteName: c.site.name,
+        siteSlug: c.site.slug,
+        hvacAutoSchedule: c.hvacAutoSchedule,
+        voidRoomDetection: c.voidRoomDetection,
+        peakAvoidance: c.peakAvoidance,
+        lightingAutomation: c.lightingAutomation,
+        boilerOptimisation: c.boilerOptimisation,
+        waterHeatingOpt: c.waterHeatingOpt,
+        maxAutonomyLevel: c.maxAutonomyLevel,
+        hvacMinTemp: c.hvacMinTemp,
+        hvacMaxTemp: c.hvacMaxTemp,
+        nightModeStart: c.nightModeStart,
+        nightModeEnd: c.nightModeEnd,
+        peakTariffThreshold: c.peakTariffThreshold,
+      })),
+    });
+  } catch (error) {
+    console.error('[SETTINGS_GET] error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 // ── PATCH — save changes with audit logging ─────────────────────────────────
@@ -104,8 +112,15 @@ interface AuditEntry {
 }
 
 export async function PATCH(req: NextRequest) {
-  const body = await req.json();
-  const { platform, notifications, sites, userId, userName } = body as {
+  try {
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    const { platform, notifications, sites, userId, userName } = body as {
     platform?: { agentActive?: boolean; globalAutonomy?: number };
     notifications?: {
       alertLevel?: string;
@@ -247,10 +262,17 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
-  // 4. Insert audit entries
-  if (auditEntries.length > 0) {
-    await prisma.auditLog.createMany({ data: auditEntries });
-  }
+    // 4. Insert audit entries
+    if (auditEntries.length > 0) {
+      await prisma.auditLog.createMany({ data: auditEntries });
+    }
 
-  return NextResponse.json({ success: true, changesCount: auditEntries.length });
+    return NextResponse.json({ success: true, changesCount: auditEntries.length });
+  } catch (error) {
+    console.error('[SETTINGS_PATCH] error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

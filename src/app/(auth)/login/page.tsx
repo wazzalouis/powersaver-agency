@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { Suspense, useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FusionLogo } from '@/components/brand/FusionLogo';
@@ -11,12 +11,18 @@ import { AlertCircle } from 'lucide-react';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { status } = useSession();
   const callbackUrl = searchParams.get('callbackUrl') || '/overview';
 
   const [email, setEmail] = useState('admin@fusionstudents.co.uk');
   const [password, setPassword] = useState('FusionDemo2026!');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect already-authenticated users
+  useEffect(() => {
+    if (status === 'authenticated') router.replace(callbackUrl);
+  }, [status, callbackUrl, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

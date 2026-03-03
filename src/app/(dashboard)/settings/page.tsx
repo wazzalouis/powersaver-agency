@@ -33,6 +33,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/lib/auth-helpers';
 import { AccessDenied } from '@/components/auth/AccessDenied';
+import { fetchJson } from '@/lib/formatters';
 import type {
   SettingsData,
   AuditData,
@@ -160,17 +161,14 @@ export default function SettingsPage() {
   // Fetch settings
   const { data, isLoading } = useQuery<SettingsData>({
     queryKey: ['settings'],
-    queryFn: () => fetch('/api/settings').then((r) => r.json()),
+    queryFn: () => fetchJson('/api/settings'),
     enabled: !!isAdmin,
   });
 
   // Fetch audit log
   const { data: auditData, isLoading: auditLoading } = useQuery<AuditData>({
     queryKey: ['audit-log', auditPage],
-    queryFn: () =>
-      fetch(`/api/settings/audit-log?page=${auditPage}&limit=10`).then((r) =>
-        r.json(),
-      ),
+    queryFn: () => fetchJson(`/api/settings/audit-log?page=${auditPage}&limit=10`),
     enabled: !!isAdmin,
   });
 
@@ -435,7 +433,7 @@ export default function SettingsPage() {
   return (
     <div className="pb-12">
       {/* Header + Save bar */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2.5">
             <Settings size={22} className="text-fusion-primary" />

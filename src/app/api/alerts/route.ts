@@ -9,5 +9,13 @@ const demoAlerts: Alert[] = [
 ];
 
 export async function GET() {
-  return NextResponse.json({ alerts: demoAlerts });
+  try {
+    return NextResponse.json({ alerts: demoAlerts });
+  } catch (error) {
+    console.error('[ALERTS] error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

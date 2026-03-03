@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { LayoutDashboard, Activity, Building2, Bot, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Activity, Building2, Bot, Settings } from 'lucide-react';
 
 const mobileNavItems = [
   { label: 'Overview', href: '/overview',  icon: LayoutDashboard },
   { label: 'Live',     href: '/realtime',  icon: Activity },
   { label: 'Sites',    href: '/sites',     icon: Building2 },
   { label: 'Agent',    href: '/agent',     icon: Bot },
-  { label: 'Savings',  href: '/savings',   icon: TrendingUp },
+  { label: 'Settings', href: '/settings',  icon: Settings },
 ];
 
 export function MobileNav() {
