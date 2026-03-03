@@ -1,0 +1,12 @@
+[build]
+  command = "npx prisma generate && npx prisma db push && npx tsx prisma/seed.ts && next build"
+  publish = ".next"
+
+[build.environment]
+  DATABASE_URL = "file:./dev.db"
+  NEXTAUTH_SECRET = "fusion-energy-platform-secret-key-2026"
+  NEXTAUTH_URL = "https://fusion-energy-demo.netlify.app"
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

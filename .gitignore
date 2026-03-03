@@ -42,6 +42,10 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# database
+# database (allow prisma/dev.db for Vercel deployment)
 *.db
 *.db-journal
+!prisma/dev.db
+
+# Local Netlify folder
+.netlify
